@@ -4,23 +4,25 @@
 {
     //Required. Inputs the module expects.
     "inputs": [
-        //e.g.
-        /*
         {
-            "id": "from",
-            "title":"From"
+            "id": "worksheet",
+            "title":"Worksheet ID"
+        },
+        {
+            "id": "LastColumn",
+            "title":"Last Column Letter"
+        },
+        {
+            "id": "LastRow",
+            "title":"Last Row Number"
         }
-        */
     ],
     //Required. Outputs the module emits.
     "outputs": [
-      //e.g.
-      /*
         {
-            "id": "from",
-            "title":"From"
+            "id": "sheet",
+            "title":"rectangular grid of values"
         }
-      */
     ],
-    "title": "Google Sheets Get Data Range" /* Required.A display name for the module */
+    "title": "Google Sheets Get Sheet Values" /* Required.A display name for the module */
 }
