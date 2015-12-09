@@ -25,5 +25,5 @@
         }
     ],
     "icon": "google",
-    "title": "Google Sheets Get Sheet Values" /* Required.A display name for the module */
+    "title": "Google Sheets Get Data Range" /* Required.A display name for the module */
 }
