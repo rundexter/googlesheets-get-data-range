@@ -4,18 +4,13 @@ var _ = require('lodash'),
 module.exports = {
     checkAuthOptions: function (step, dexter) {
 
-        if(
-            !step.input('LastRow').first() ||
-            !step.input('LastColumn').first()
-        ) {
+        if(!step.input('LastRow').first() || !step.input('LastColumn').first())
+            return 'A [worksheet, LastRow, LastColumn] inputs variable is required for this module';
 
-            this.fail('A [worksheet, LastRow, LastColumn] inputs variable is required for this module');
-        }
+        if(!dexter.environment('google_spreadsheet'))
+            return 'A [google_spreadsheet] environment variable is required for this module';
 
-        if(!dexter.environment('google_access_token') || !dexter.environment('google_spreadsheet')) {
-
-            this.fail('A [google_access_token, google_spreadsheet] environment variable is required for this module');
-        }
+        return false;
     },
 
     convertColumnLetter: function(val) {
@@ -57,7 +52,8 @@ module.exports = {
      * @param {AppData} dexter Container for all data used in this workflow.
      */
     run: function(step, dexter) {
-
+        var credentials = dexter.provider('google').credentials(),
+            error = this.checkAuthOptions(step, dexter);
         var spreadsheetId = dexter.environment('google_spreadsheet'),
             lastRow = step.input('LastRow').first(),
             lastColumn = step.input('LastColumn').first();
@@ -68,33 +64,24 @@ module.exports = {
             numRows = _.parseInt(lastRow),
             numColumns = this.convertColumnLetter(lastColumn);
 
-        this.checkAuthOptions(step, dexter);
+        if (error) return this.fail(error);
 
         Spreadsheet.load({
-            //debug: true,
             spreadsheetId: spreadsheetId,
             worksheetId: worksheetId,
             accessToken: {
                 type: 'Bearer',
-                token: dexter.environment('google_access_token')
+                token: _.get(credentials, 'access_token')
             }
         }, function (err, spreadsheet) {
 
-            if (err) {
-
+            if (err)
                 this.fail(err);
-            }
+            else
+                spreadsheet.receive({ getValues: true }, function (error, rows) {
 
-            spreadsheet.receive({ getValues: true }, function (err, rows) {
-
-                if (err) {
-
-                    this.fail(err);
-                } else {
-
-                    this.complete({sheet: this.pickSheetData(rows, startRow, startColumn, numRows, numColumns)});
-                }
-            }.bind(this));
+                    error? this.fail(error) : this.complete({sheet: this.pickSheetData(rows, startRow, startColumn, numRows, numColumns)});
+                }.bind(this));
         }.bind(this));
 
     }
